@@ -171,6 +171,27 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void generateAndOpenPDF() async {
+    // Create a text content for the text file
+    String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
+    textContent += names.join('\n');
+    textContent += '\n\nSelected ATCO and Timestamp:\n';
+    textContent +=
+        selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
+
+    // Create a text blob
+    final textBlob = Blob([textContent]);
+
+    // Create a URL for the text blob
+    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
+
+    // Create an anchor element to trigger the download of the text file
+    final anchor = AnchorElement(href: textFileUrl)
+      ..setAttribute('download', 'selected_names.txt')
+      ..setAttribute('target', 'blank') // Open in a new tab/window
+      ..setAttribute('rel', 'noopener noreferrer') // Security attributes
+      ..click();
+
+    // Create the PDF as before
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -189,19 +210,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     final pdfBytes = pdf.save();
-    final blob = Blob([pdfBytes]);
-    final url = Url.createObjectUrlFromBlob(blob);
-    DateTime now = DateTime.now();
-    String generatedDate = now.toLocal().toString();
+    final pdfBlob = Blob([pdfBytes]);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => MyPDF(
-                date: generatedDate,
-                selectedStaff: selectedNames,
-                allStaff: names,
-              )),
-    );
+    // Create a URL for the PDF blob
+    final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
+
+    // Open the PDF in a new tab
+    AnchorElement(href: pdfUrl)
+      ..setAttribute('target', 'blank')
+      ..click();
   }
 }
