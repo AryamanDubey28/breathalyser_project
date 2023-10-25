@@ -1,4 +1,5 @@
 import 'dart:html';
+import 'dart:html' as html;
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
@@ -35,9 +36,9 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController nameController = TextEditingController();
   List<String> names = [];
   List<String> selectedNames = [];
-  bool showPdfButton =
-      false; // To control the visibility of "Show as PDF" button
-  int pdfPage = 0; // Page number for PDF viewer
+  bool showPdfButton = false;
+  int pdfPage = 0;
+  String timestamp = '';
 
   @override
   Widget build(BuildContext context) {
@@ -55,10 +56,11 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               'Airports Authority of India, C.C.S.I Airport, Lucknow',
               style: TextStyle(
-                  color: Colors.blue[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24),
-            )
+                color: Colors.blue[700],
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
+            ),
           ],
         ),
         elevation: 0,
@@ -77,10 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             TextField(
               controller: nameController,
-              maxLines: null, // Allow multiple lines for pasting
+              maxLines: null,
               keyboardType: TextInputType.multiline,
               decoration: const InputDecoration(
-                  labelText: 'Enter names (one per line)'),
+                labelText: 'Enter names (one per line)',
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -92,13 +95,20 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(height: 16),
             const Text('All Inputted Names:'),
             Expanded(
-              child: ListView.builder(
-                itemCount: names.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(names[index]),
-                  );
-                },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: ListView.builder(
+                  itemCount: names.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(names[index]),
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 16),
@@ -106,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: () {
                 selectRandomNames();
                 setState(() {
-                  showPdfButton = true; // Show the "Show as PDF" button
+                  showPdfButton = true;
                 });
               },
               child: const Text('Randomise'),
@@ -124,13 +134,29 @@ class _MyHomePageState extends State<MyHomePage> {
             const SizedBox(height: 16),
             const Text('Randomly Selected Names:'),
             Expanded(
-              child: ListView.builder(
-                itemCount: selectedNames.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(selectedNames[index]),
-                  );
-                },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: selectedNames.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(selectedNames[index]),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                        'Timestamp: $timestamp'), // Displays the timestamp when randomised
+                  ],
+                ),
               ),
             ),
           ],
@@ -146,7 +172,6 @@ class _MyHomePageState extends State<MyHomePage> {
       for (String name in enteredNames) {
         name = name.trim();
         if (name.isNotEmpty) {
-          // Remove '*' and '/' characters using regex
           name = name.replaceAll(RegExp(r'[*\/]'), '');
           setState(() {
             names.add(name);
@@ -160,38 +185,33 @@ class _MyHomePageState extends State<MyHomePage> {
   void selectRandomNames() {
     Random random = Random();
     int totalNames = names.length;
-    int numberOfSelectedNames =
-        (totalNames * 0.10).ceil(); // Select 10% of names
+    int numberOfSelectedNames = (totalNames * 0.10).ceil();
 
-    // Use the random package to shuffle and select names randomly
     List<String> shuffledNames = List.from(names)..shuffle(random);
     selectedNames = shuffledNames.take(numberOfSelectedNames).toList();
+
+    // Updates the timestamp when randomised
+    timestamp = DateTime.now().toLocal().toString();
 
     setState(() {});
   }
 
   void generateAndOpenPDF() async {
-    // Create a text content for the text file
     String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
     textContent += names.join('\n');
     textContent += '\n\nSelected ATCO and Timestamp:\n';
     textContent +=
         selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
 
-    // Create a text blob
     final textBlob = Blob([textContent]);
-
-    // Create a URL for the text blob
     final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
 
-    // Create an anchor element to trigger the download of the text file
     final anchor = AnchorElement(href: textFileUrl)
       ..setAttribute('download', 'selected_names.txt')
-      ..setAttribute('target', 'blank') // Open in a new tab/window
-      ..setAttribute('rel', 'noopener noreferrer') // Security attributes
+      ..setAttribute('target', 'blank')
+      ..setAttribute('rel', 'noopener noreferrer')
       ..click();
 
-    // Create the PDF as before
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -212,10 +232,8 @@ class _MyHomePageState extends State<MyHomePage> {
     final pdfBytes = pdf.save();
     final pdfBlob = Blob([pdfBytes]);
 
-    // Create a URL for the PDF blob
     final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
 
-    // Open the PDF in a new tab
     AnchorElement(href: pdfUrl)
       ..setAttribute('target', 'blank')
       ..click();
