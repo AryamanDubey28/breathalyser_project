@@ -1,5 +1,5 @@
-import 'dart:html';
-import 'dart:html' as html;
+//import 'dart:html';
+//import 'dart:html' as html;
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
@@ -126,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.only(top: 15.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    generateAndOpenPDF();
+                    // generateAndOpenPDF();
                   },
                   child: const Text('Show as PDF'),
                 ),
@@ -196,46 +196,46 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-  void generateAndOpenPDF() async {
-    String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
-    textContent += names.join('\n');
-    textContent += '\n\nSelected ATCO and Timestamp:\n';
-    textContent +=
-        selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
-
-    final textBlob = Blob([textContent]);
-    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
-
-    final anchor = AnchorElement(href: textFileUrl)
-      ..setAttribute('download', 'selected_names.txt')
-      ..setAttribute('target', 'blank')
-      ..setAttribute('rel', 'noopener noreferrer')
-      ..click();
-
-    final pdf = pw.Document();
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) {
-          return pw.Center(
-            child: pw.Column(
-              children: selectedNames
-                  .map(
-                    (name) => pw.Text(name),
-                  )
-                  .toList(),
-            ),
-          );
-        },
-      ),
-    );
-
-    final pdfBytes = pdf.save();
-    final pdfBlob = Blob([pdfBytes]);
-
-    final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
-
-    AnchorElement(href: pdfUrl)
-      ..setAttribute('target', 'blank')
-      ..click();
-  }
+//  void generateAndOpenPDF() async {
+//    String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
+//    textContent += names.join('\n');
+//    textContent += '\n\nSelected ATCO and Timestamp:\n';
+//    textContent +=
+//        selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
+//
+//    final textBlob = Blob([textContent]);
+//    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
+//
+//    final anchor = AnchorElement(href: textFileUrl)
+//      ..setAttribute('download', 'selected_names.txt')
+//      ..setAttribute('target', 'blank')
+//      ..setAttribute('rel', 'noopener noreferrer')
+//      ..click();
+//
+//    final pdf = pw.Document();
+//    pdf.addPage(
+//      pw.Page(
+//        build: (pw.Context context) {
+//          return pw.Center(
+//            child: pw.Column(
+//              children: selectedNames
+//                  .map(
+//                    (name) => pw.Text(name),
+//                  )
+//                  .toList(),
+//            ),
+//          );
+//        },
+//      ),
+//    );
+//
+//    final pdfBytes = pdf.save();
+//    final pdfBlob = Blob([pdfBytes]);
+//
+//    final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
+//
+//    AnchorElement(href: pdfUrl)
+//      ..setAttribute('target', 'blank')
+//      ..click();
+//  }
 }
