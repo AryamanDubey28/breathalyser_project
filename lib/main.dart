@@ -200,12 +200,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void addNewContentToText() {
     // Append the selected names to the existing content
-    textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
+    textContent += '\nNames of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
     textContent +=
-        '\n\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n';
-    textContent += selectedNames.join(', ') + '\n';
-    textContent += "-------------------------------------------------";
+        '\n\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n\n';
+    textContent += '${selectedNames.join(', ')}\n';
+    textContent += "\n------------------------------------------------- ";
   }
 
   void generateAndOpenPDF() {
@@ -227,27 +227,27 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    // Generate PDF bytes
     final pdfBytes = pdf.save();
-    final pdfBlob = Blob([pdfBytes]);
-    final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
+    DateTime now = DateTime.now();
+    String generatedDate = now.toLocal().toString();
 
-    // Open the PDF
-    AnchorElement(href: pdfUrl)
-      ..setAttribute('target', 'blank')
-      ..click();
-
-    // Create a Blob with specific content type and add it to an anchor element for download
-    final textBlob = Blob([textContent], 'text/plain;charset=utf-8');
+    // Create a Blob with the updated content
+    final textBlob = Blob([textContent]);
     final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
 
-    AnchorElement(href: textFileUrl)
-      ..setAttribute('download',
-          'Selected_ATCO_${DateTime.now().toLocal().toString()}.txt')
-      ..setAttribute('target', 'blank') // Open in a new tab/window
-      ..setAttribute('rel',
-          'noopener noreferrer') // Adds security measures for opening links
+    // Create an anchor element to trigger the updated text file download
+    final textAnchor = AnchorElement(href: textFileUrl)
+      ..setAttribute('download', 'Selected_ATCO.txt')
       ..click();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => MyPDF(
+                date: generatedDate,
+                selectedStaff: selectedNames,
+                allStaff: names,
+              )),
+    );
   }
 }
 
@@ -275,13 +275,13 @@ class _MyHomePageState extends State<MyHomePage> {
 //     DateTime now = DateTime.now();
 //     String generatedDate = now.toLocal().toString();
 
-//     Navigator.push(
-//       context,
-//       MaterialPageRoute(
-//           builder: (context) => MyPDF(
-//                 date: generatedDate,
-//                 selectedStaff: selectedNames,
-//                 allStaff: names,
-//               )),
-//     );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (context) => MyPDF(
+    //             date: generatedDate,
+    //             selectedStaff: selectedNames,
+    //             allStaff: names,
+    //           )),
+    // );
 //   }
