@@ -39,6 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showPdfButton = false;
   int pdfPage = 0;
   String timestamp = '';
+  String textContent = ''; // Maintain the content here
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.only(top: 15.0),
                 child: ElevatedButton(
                   onPressed: () {
+                    addNewContentToText();
                     generateAndOpenPDF();
                   },
                   child: const Text('Show as PDF'),
@@ -196,22 +198,17 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-  void generateAndOpenPDF() async {
-    String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
+  void addNewContentToText() {
+    // Append the selected names to the existing content
+    textContent += 'Name of the ATCOs (Sh./Ms.):\n';
     textContent += names.join('\n');
-    textContent += '\n\nSelected ATCO and Timestamp:\n';
     textContent +=
-        selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
+        '\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n';
+    textContent += selectedNames.join(', ') + '\n';
+  }
 
-    final textBlob = Blob([textContent]);
-    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
-
-    final anchor = AnchorElement(href: textFileUrl)
-      ..setAttribute('download', 'selected_names.txt')
-      ..setAttribute('target', 'blank')
-      ..setAttribute('rel', 'noopener noreferrer')
-      ..click();
-
+  void generateAndOpenPDF() {
+    // Create a PDF document as before
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -229,13 +226,58 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
+    // Generate PDF bytes
     final pdfBytes = pdf.save();
     final pdfBlob = Blob([pdfBytes]);
-
     final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
 
+    // Open the PDF
     AnchorElement(href: pdfUrl)
       ..setAttribute('target', 'blank')
       ..click();
+
+    // Now, you can also save the text content as a single text file
+    final textBlob = Blob([textContent]);
+    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
+
+    // You can add a download link for the text file if needed
+    AnchorElement(href: textFileUrl)
+      ..setAttribute('download', 'selected_names.txt')
+      ..click();
   }
 }
+
+// void generateAndOpenPDF() async {
+//     final pdf = pw.Document();
+//     pdf.addPage(
+//       pw.Page(
+//         build: (pw.Context context) {
+//           return pw.Center(
+//             child: pw.Column(
+//               children: selectedNames
+//                   .map(
+//                     (name) => pw.Text(name),
+//                   )
+//                   .toList(),
+//             ),
+//           );
+//         },
+//       ),
+//     );
+
+//     final pdfBytes = pdf.save();
+//     final blob = Blob([pdfBytes]);
+//     final url = Url.createObjectUrlFromBlob(blob);
+//     DateTime now = DateTime.now();
+//     String generatedDate = now.toLocal().toString();
+
+//     Navigator.push(
+//       context,
+//       MaterialPageRoute(
+//           builder: (context) => MyPDF(
+//                 date: generatedDate,
+//                 selectedStaff: selectedNames,
+//                 allStaff: names,
+//               )),
+//     );
+//   }
