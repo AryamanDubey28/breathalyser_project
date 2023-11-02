@@ -1,8 +1,15 @@
+import 'dart:html';
+import 'dart:html' as html;
+import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'dart:html' as html;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:flutter_pdfview/flutter_pdfview.dart';
+import 'dart:io' as dart_io;
+import 'package:provider/provider.dart';
 
-void main() {
+void main(List<String> args) {
   runApp(MyApp());
 }
 
@@ -32,13 +39,30 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showPdfButton = false;
   int pdfPage = 0;
   String timestamp = '';
-  String textContent = ''; // Global variable to store text content
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Random Name Selector'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'lib/assets/AIRPORT_LOGO.png',
+              height: 100,
+              width: 100,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Airports Authority of India, C.C.S.I Airport, Lucknow',
+              style: TextStyle(
+                color: Colors.blue[700],
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
+            ),
+          ],
+        ),
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
@@ -47,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             const Text(
-              "Randomiser for Breath Analyser Examination",
+              "Randomiser for Breath Analyser Examination (Ref: DGCA CAR SECTION 5 - AIR SAFETY SERIES F PART IV)",
               style: TextStyle(color: Colors.black),
             ),
             const SizedBox(
@@ -102,9 +126,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.only(top: 15.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    appendToTextFile();
+                    generateAndOpenPDF();
                   },
-                  child: const Text('Append to Text File'),
+                  child: const Text('Show as PDF'),
                 ),
               ),
             const SizedBox(height: 16),
@@ -130,8 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Timestamp: $timestamp',
-                    ),
+                        'Timestamp: $timestamp'), // Displays the timestamp when randomised
                   ],
                 ),
               ),
@@ -167,26 +190,52 @@ class _MyHomePageState extends State<MyHomePage> {
     List<String> shuffledNames = List.from(names)..shuffle(random);
     selectedNames = shuffledNames.take(numberOfSelectedNames).toList();
 
-    // Updates the timestamp when randomized
+    // Updates the timestamp when randomised
     timestamp = DateTime.now().toLocal().toString();
-
-    // Update the text content to append the new data
-    textContent += '\n\nName of the ATCOs (Sh./Ms.):\n';
-    textContent += names.join('\n');
-    textContent += '\n\nSelected ATCO and Timestamp:\n';
-    textContent += selectedNames.join(', ') + ' - $timestamp';
 
     setState(() {});
   }
 
-  void appendToTextFile() {
-    final textBlob = html.Blob([textContent], 'text/plain');
-    final textFileUrl = html.Url.createObjectUrlFromBlob(textBlob);
+  void generateAndOpenPDF() async {
+    String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
+    textContent += names.join('\n');
+    textContent += '\n\nSelected ATCO and Timestamp:\n';
+    textContent +=
+        selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
 
-    final anchor = html.AnchorElement(href: textFileUrl)
+    final textBlob = Blob([textContent]);
+    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
+
+    final anchor = AnchorElement(href: textFileUrl)
       ..setAttribute('download', 'selected_names.txt')
       ..setAttribute('target', 'blank')
       ..setAttribute('rel', 'noopener noreferrer')
+      ..click();
+
+    final pdf = pw.Document();
+    pdf.addPage(
+      pw.Page(
+        build: (pw.Context context) {
+          return pw.Center(
+            child: pw.Column(
+              children: selectedNames
+                  .map(
+                    (name) => pw.Text(name),
+                  )
+                  .toList(),
+            ),
+          );
+        },
+      ),
+    );
+
+    final pdfBytes = pdf.save();
+    final pdfBlob = Blob([pdfBytes]);
+
+    final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
+
+    AnchorElement(href: pdfUrl)
+      ..setAttribute('target', 'blank')
       ..click();
   }
 }
