@@ -243,9 +243,11 @@ class _MyHomePageState extends State<MyHomePage> {
     final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
 
     // Create an anchor element to trigger the updated text file download
+
     final textAnchor = AnchorElement(href: textFileUrl)
       ..setAttribute('download', 'Selected_ATCO.txt')
       ..click();
+
     Navigator.push(
       context,
       MaterialPageRoute(
