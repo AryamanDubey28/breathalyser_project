@@ -40,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int pdfPage = 0;
   String timestamp = '';
   String textContent = ''; // Maintain the content here
+  late Blob textBlob;
 
   @override
   Widget build(BuildContext context) {
@@ -200,12 +201,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void addNewContentToText() {
     // Append the selected names to the existing content
-    textContent += '\nNames of the ATCOs (Sh./Ms.):\n\n';
+    textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
     textContent +=
-        '\n\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n\n';
-    textContent += '${selectedNames.join(', ')}\n';
-    textContent += "\n------------------------------------------------- ";
+        '\n\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n';
+    textContent += selectedNames.join(', ') + '\n';
+    textContent += "-------------------------------------------------";
+
+    // Update the existing Blob with the new content
+    textBlob = Blob([textContent], 'text/plain;charset=utf-8');
+
+    // No need to create a new anchor element or trigger download
+    // The file will not be downloaded again
   }
 
   void generateAndOpenPDF() {
