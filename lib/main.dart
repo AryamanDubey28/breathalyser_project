@@ -200,11 +200,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void addNewContentToText() {
     // Append the selected names to the existing content
-    textContent += 'Name of the ATCOs (Sh./Ms.):\n';
+    textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
     textContent +=
-        '\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n';
+        '\n\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n';
     textContent += selectedNames.join(', ') + '\n';
+    textContent += "-------------------------------------------------";
   }
 
   void generateAndOpenPDF() {
@@ -236,13 +237,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ..setAttribute('target', 'blank')
       ..click();
 
-    // Now, you can also save the text content as a single text file
-    final textBlob = Blob([textContent]);
+    // Create a Blob with specific content type and add it to an anchor element for download
+    final textBlob = Blob([textContent], 'text/plain;charset=utf-8');
     final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
 
-    // You can add a download link for the text file if needed
     AnchorElement(href: textFileUrl)
-      ..setAttribute('download', 'selected_names.txt')
+      ..setAttribute('download',
+          'Selected_ATCO_${DateTime.now().toLocal().toString()}.txt')
+      ..setAttribute('target', 'blank') // Open in a new tab/window
+      ..setAttribute('rel',
+          'noopener noreferrer') // Adds security measures for opening links
       ..click();
   }
 }
