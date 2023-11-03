@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:html' as html;
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -193,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
     selectedNames = shuffledNames.take(numberOfSelectedNames).toList();
 
     // Updates the timestamp when randomised
-    timestamp = DateTime.now().toLocal().toString();
+    timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal());
 
     setState(() {});
   }

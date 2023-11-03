@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MyPDF extends StatelessWidget {
   final String date;
@@ -16,6 +17,9 @@ class MyPDF extends StatelessWidget {
     double screenHeight = MediaQuery.of(context).size.height;
     double tableHeight = 0.75 * screenHeight; // 80% of the screen height
 
+    String formattedDate =
+        DateFormat('yyyy-MM-dd HH:mm').format(DateTime.parse(date));
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -30,10 +34,11 @@ class MyPDF extends StatelessWidget {
             Text(
               'Airports Authority of India, C.C.S.I Airport, Lucknow',
               style: TextStyle(
-                  color: Colors.blue[700],
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24),
-            )
+                color: Colors.blue[700],
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
+            ),
           ],
         ),
         elevation: 0,
@@ -64,7 +69,7 @@ class MyPDF extends StatelessWidget {
                 const SizedBox(
                   width: 20,
                 ),
-                Text("Date: $date",
+                Text("Date: $formattedDate",
                     style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
@@ -83,7 +88,9 @@ class MyPDF extends StatelessWidget {
                           const Text(
                             'Name of the ATCOs (Sh./Ms.)',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           DataTable(
                             columns: const [
@@ -112,7 +119,9 @@ class MyPDF extends StatelessWidget {
                           const Text(
                             'The ATCOs to be undertaking the Breath Analyser Examination:',
                             style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           DataTable(
                             columns: const [
