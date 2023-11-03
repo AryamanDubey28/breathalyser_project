@@ -3,6 +3,7 @@ import 'dart:html' as html;
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:math';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -41,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int pdfPage = 0;
   String timestamp = '';
   String textContent = ''; // Maintain the content here
-  late Blob textBlob;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -167,6 +168,26 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+  Future<String> getFilePath() async {
+  final directory = await getApplicationDocumentsDirectory();
+  return File('${directory.path}/your_text_file.txt' as List<Object>).path;
+}
+
+Future<void> writeToFile(String data) async {
+  final path = await getFilePath();
+  final file = File(path as List<Object>);
+  await file.writeAsString(data);
+}
+
+Future<String> readFromFile() async {
+  final path = await getFilePath();
+  final file = File(path as List<Object>);
+  if (await file.exists()) {
+    return await file.readAsString();
+  } else {
+    return ''; // Return an empty string if the file doesn't exist yet
+  }
+}
 
   void addNamesFromTextField() {
     String text = nameController.text.trim();
@@ -220,6 +241,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     DateTime now = DateTime.now();
     String generatedDate = now.toLocal().toString();
+
+    final pdfBytes = pdf.save();
+  final blob = Blob([pdfBytes]);
+
+  // Write the PDF to the file
+  await writeToFile(pdfBytes as String);
+
+  DateTime now = DateTime.now();
+  String generatedDate = now.toLocal().toString();
 
     Navigator.push(
       context,
