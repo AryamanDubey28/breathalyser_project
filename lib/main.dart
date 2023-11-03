@@ -39,6 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showPdfButton = false;
   int pdfPage = 0;
   String timestamp = '';
+  String textContent = ''; // Maintain the content here
+  late Blob textBlob;
 
   @override
   Widget build(BuildContext context) {
@@ -196,22 +198,8 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-  void generateAndOpenPDF() async {
-    String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
-    textContent += names.join('\n');
-    textContent += '\n\nSelected ATCO and Timestamp:\n';
-    textContent +=
-        selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
-
-    final textBlob = Blob([textContent]);
-    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
-
-    final anchor = AnchorElement(href: textFileUrl)
-      ..setAttribute('download', 'selected_names.txt')
-      ..setAttribute('target', 'blank')
-      ..setAttribute('rel', 'noopener noreferrer')
-      ..click();
-
+  void generateAndOpenPDF() {
+    // Create a PDF document as before
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -229,13 +217,52 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    final pdfBytes = pdf.save();
-    final pdfBlob = Blob([pdfBytes]);
+    DateTime now = DateTime.now();
+    String generatedDate = now.toLocal().toString();
 
-    final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
-
-    AnchorElement(href: pdfUrl)
-      ..setAttribute('target', 'blank')
-      ..click();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => MyPDF(
+                date: generatedDate,
+                selectedStaff: selectedNames,
+                allStaff: names,
+              )),
+    );
   }
 }
+
+// void generateAndOpenPDF() async {
+//     final pdf = pw.Document();
+//     pdf.addPage(
+//       pw.Page(
+//         build: (pw.Context context) {
+//           return pw.Center(
+//             child: pw.Column(
+//               children: selectedNames
+//                   .map(
+//                     (name) => pw.Text(name),
+//                   )
+//                   .toList(),
+//             ),
+//           );
+//         },
+//       ),
+//     );
+
+//     final pdfBytes = pdf.save();
+//     final blob = Blob([pdfBytes]);
+//     final url = Url.createObjectUrlFromBlob(blob);
+//     DateTime now = DateTime.now();
+//     String generatedDate = now.toLocal().toString();
+
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //       builder: (context) => MyPDF(
+    //             date: generatedDate,
+    //             selectedStaff: selectedNames,
+    //             allStaff: names,
+    //           )),
+    // );
+//   }
