@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:html' as html;
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -194,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
     selectedNames = shuffledNames.take(numberOfSelectedNames).toList();
 
     // Updates the timestamp when randomised
-    timestamp = DateTime.now().toLocal().toString();
+    timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal());
 
     setState(() {});
   }
@@ -204,15 +205,12 @@ class _MyHomePageState extends State<MyHomePage> {
     textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
     textContent +=
-        '\n\nSelected ATCO - ${DateTime.now().toLocal().toString()}:\n';
+        '\n\nSelected ATCO - ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}:\n';
     textContent += selectedNames.join(', ') + '\n';
     textContent += "-------------------------------------------------";
 
     // Update the existing Blob with the new content
     textBlob = Blob([textContent], 'text/plain;charset=utf-8');
-
-    // No need to create a new anchor element or trigger download
-    // The file will not be downloaded again
   }
 
   void generateAndOpenPDF() {
@@ -234,25 +232,27 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    final pdfBytes = pdf.save();
+    // final pdfBytes = pdf.save(); Im not sure if Arham added this line or Aryaman - unused so commented for now
+
+    //Gets the dates and information for the timetsamps
     DateTime now = DateTime.now();
-    String generatedDate = now.toLocal().toString();
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now.toLocal());
 
     // Create a Blob with the updated content
     final textBlob = Blob([textContent]);
     final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
 
     // Create an anchor element to trigger the updated text file download
-
     final textAnchor = AnchorElement(href: textFileUrl)
       ..setAttribute('download', 'Selected_ATCO.txt')
       ..click();
 
+//Opens the PDF page on with the information
     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => MyPDF(
-                date: generatedDate,
+                date: formattedDate,
                 selectedStaff: selectedNames,
                 allStaff: names,
               )),
