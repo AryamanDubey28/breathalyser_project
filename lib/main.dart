@@ -201,15 +201,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void addNewContentToText() {
-    // Append the selected names to the existing content
+    // Appends the selected names to the existing content
     textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
     textContent +=
         '\n\nSelected ATCO - ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}:\n';
     textContent += selectedNames.join(', ') + '\n';
-    textContent += "-------------------------------------------------";
+    textContent +=
+        "-------------------------------------------------"; //Divider between each randomisation
 
-    // Update the existing Blob with the new content
+    // Update the existing Blob with the new content + specifices MIME thing which might necessary for some PCs that show in binary?
     textBlob = Blob([textContent], 'text/plain;charset=utf-8');
   }
 
@@ -232,18 +233,18 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    // final pdfBytes = pdf.save(); Im not sure if Arham added this line or Aryaman - unused so commented for now
+    // final pdfBytes = pdf.save();  -- Im not sure if Arham added this line or Aryaman - unused so commented for now
 
     //Gets the dates and information for the timetsamps
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now.toLocal());
 
-    // Create a Blob with the updated content
-    final textBlob = Blob([textContent]);
+    // Create a URL for the textBlob content.
     final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
 
-    // Create an anchor element to trigger the updated text file download
-    final textAnchor = AnchorElement(href: textFileUrl)
+// Create an anchor element (link) to trigger the download of the text file.
+    AnchorElement(href: textFileUrl)
+      // Sets the 'download' attribute +  a filename for the downloaded file.
       ..setAttribute('download', 'Selected_ATCO.txt')
       ..click();
 
@@ -259,38 +260,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-// void generateAndOpenPDF() async {
-//     final pdf = pw.Document();
-//     pdf.addPage(
-//       pw.Page(
-//         build: (pw.Context context) {
-//           return pw.Center(
-//             child: pw.Column(
-//               children: selectedNames
-//                   .map(
-//                     (name) => pw.Text(name),
-//                   )
-//                   .toList(),
-//             ),
-//           );
-//         },
-//       ),
-//     );
-
-//     final pdfBytes = pdf.save();
-//     final blob = Blob([pdfBytes]);
-//     final url = Url.createObjectUrlFromBlob(blob);
-//     DateTime now = DateTime.now();
-//     String generatedDate = now.toLocal().toString();
-
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //       builder: (context) => MyPDF(
-    //             date: generatedDate,
-    //             selectedStaff: selectedNames,
-    //             allStaff: names,
-    //           )),
-    // );
-//   }
