@@ -2,6 +2,7 @@ import 'dart:html';
 import 'dart:html' as html;
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'dart:math';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -39,6 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showPdfButton = false;
   int pdfPage = 0;
   String timestamp = '';
+  String textContent = ''; // Maintain the content here
+  late Blob textBlob;
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.only(top: 15.0),
                 child: ElevatedButton(
                   onPressed: () {
+                    addNewContentToText();
                     generateAndOpenPDF();
                   },
                   child: const Text('Show as PDF'),
@@ -191,27 +195,27 @@ class _MyHomePageState extends State<MyHomePage> {
     selectedNames = shuffledNames.take(numberOfSelectedNames).toList();
 
     // Updates the timestamp when randomised
-    timestamp = DateTime.now().toLocal().toString();
+    timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal());
 
     setState(() {});
   }
 
-  void generateAndOpenPDF() async {
-    String textContent = 'Name of the ATCOs (Sh./Ms.):\n';
+  void addNewContentToText() {
+    // Appends the selected names to the existing content
+    textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
-    textContent += '\n\nSelected ATCO and Timestamp:\n';
     textContent +=
-        selectedNames.join(', ') + ' - ${DateTime.now().toLocal().toString()}';
+        '\n\nSelected ATCO - ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}:\n';
+    textContent += selectedNames.join(', ') + '\n';
+    textContent +=
+        "-------------------------------------------------"; //Divider between each randomisation
 
-    final textBlob = Blob([textContent]);
-    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
+    // Update the existing Blob with the new content + specifices MIME thing which might necessary for some PCs that show in binary?
+    textBlob = Blob([textContent], 'text/plain;charset=utf-8');
+  }
 
-    final anchor = AnchorElement(href: textFileUrl)
-      ..setAttribute('download', 'selected_names.txt')
-      ..setAttribute('target', 'blank')
-      ..setAttribute('rel', 'noopener noreferrer')
-      ..click();
-
+  void generateAndOpenPDF() {
+    // Create a PDF document as before
     final pdf = pw.Document();
     pdf.addPage(
       pw.Page(
@@ -229,13 +233,30 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    final pdfBytes = pdf.save();
-    final pdfBlob = Blob([pdfBytes]);
+    // final pdfBytes = pdf.save();  -- Im not sure if Arham added this line or Aryaman - unused so commented for now
 
-    final pdfUrl = Url.createObjectUrlFromBlob(pdfBlob);
+    //Gets the dates and information for the timetsamps
+    DateTime now = DateTime.now();
+    String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now.toLocal());
 
-    AnchorElement(href: pdfUrl)
-      ..setAttribute('target', 'blank')
+    // Create a URL for the textBlob content.
+    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
+
+// Create an anchor element (link) to trigger the download of the text file.
+    AnchorElement(href: textFileUrl)
+      // Sets the 'download' attribute +  a filename for the downloaded file.
+      ..setAttribute('download', 'Selected_ATCO.txt')
       ..click();
+
+//Opens the PDF page on with the information
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => MyPDF(
+                date: formattedDate,
+                selectedStaff: selectedNames,
+                allStaff: names,
+              )),
+    );
   }
 }
