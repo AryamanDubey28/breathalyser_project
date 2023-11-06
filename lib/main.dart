@@ -1,5 +1,6 @@
 import 'dart:html';
 import 'dart:html' as html;
+import 'dart:io';
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -200,6 +201,35 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
+  Future appendNamesToFile() async {
+    //open history.txt and append names to it then close file
+    print("in method at start");
+    dart_io.File file = dart_io.File('/history.txt');
+    print("made file onject");
+    // Open the file for appending
+    IOSink? sink;
+    print("made sink");
+    try {
+      print("in try");
+      sink = file.openWrite(mode: FileMode.append);
+      print("opened file in append mode");
+      // Append each name from the list to the file
+      sink.writeln("\nName of the ATCOs (Sh./Ms.):\n\n");
+      for (String name in names) {
+        sink.writeln(name);
+      }
+      sink.writeln(
+          DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal()));
+      sink.writeln("-----------------------------------------------------");
+      print("weote to file");
+    } finally {
+      // Close the file
+      sink?.close();
+      print("closed file");
+    }
+    //should be async?
+  }
+
   void addNewContentToText() {
     // Appends the selected names to the existing content
     textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
@@ -214,7 +244,20 @@ class _MyHomePageState extends State<MyHomePage> {
     textBlob = Blob([textContent], 'text/plain;charset=utf-8');
   }
 
-  void generateAndOpenPDF() {
+  void routeToMyPDF(String formattedDate) {
+    //Opens the PDF page on with the information
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => MyPDF(
+                date: formattedDate,
+                selectedStaff: selectedNames,
+                allStaff: names,
+              )),
+    );
+  }
+
+  void generateAndOpenPDF() async {
     // Create a PDF document as before
     final pdf = pw.Document();
     pdf.addPage(
@@ -245,18 +288,13 @@ class _MyHomePageState extends State<MyHomePage> {
 // Create an anchor element (link) to trigger the download of the text file.
     AnchorElement(href: textFileUrl)
       // Sets the 'download' attribute +  a filename for the downloaded file.
-      ..setAttribute('download', 'Selected_ATCO.txt')
+      ..setAttribute('download', 'Selected_ATCO_$formattedDate.txt')
       ..click();
 
-//Opens the PDF page on with the information
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => MyPDF(
-                date: formattedDate,
-                selectedStaff: selectedNames,
-                allStaff: names,
-              )),
-    );
+    // print("Going to append names to history.txt");
+    // await appendNamesToFile();
+    // print("Appended names to history.txt");
+
+    routeToMyPDF(formattedDate);
   }
 }
