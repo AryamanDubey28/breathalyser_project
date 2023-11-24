@@ -1,14 +1,8 @@
-import 'dart:html';
-import 'dart:io';
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'dart:io' as dart_io;
-import 'package:provider/provider.dart';
 
 void main(List<String> args) {
   runApp(MyApp());
@@ -41,7 +35,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int pdfPage = 0;
   String timestamp = '';
   String textContent = ''; // Maintain the content here
-  late Blob textBlob;
 
   @override
   Widget build(BuildContext context) {
@@ -199,34 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-  Future appendNamesToFile() async {
-    //open history.txt and append names to it then close file
-    print("in method at start");
-    dart_io.File file = dart_io.File('/history.txt');
-    print("made file onject");
-    // Open the file for appending
-    IOSink? sink;
-    print("made sink");
-    try {
-      print("in try");
-      sink = file.openWrite(mode: FileMode.append);
-      print("opened file in append mode");
-      // Append each name from the list to the file
-      sink.writeln("\nName of the ATCOs (Sh./Ms.):\n\n");
-      for (String name in names) {
-        sink.writeln(name);
-      }
-      sink.writeln(
-          DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal()));
-      sink.writeln("-----------------------------------------------------");
-      print("weote to file");
-    } finally {
-      // Close the file
-      sink?.close();
-      print("closed file");
-    }
-    //should be async?
-  }
+  void downloadTextFile() {}
 
   void routeToMyPDF(String formattedDate) {
     //Opens the PDF page on with the information
@@ -267,3 +233,32 @@ class _MyHomePageState extends State<MyHomePage> {
     routeToMyPDF(formattedDate);
   }
 }
+
+// Future appendNamesToFile() async {
+//     //open history.txt and append names to it then close file
+//     print("in method at start");
+//     dart_io.File file = dart_io.File('/history.txt');
+//     print("made file onject");
+//     // Open the file for appending
+//     IOSink? sink;
+//     print("made sink");
+//     try {
+//       print("in try");
+//       sink = file.openWrite(mode: FileMode.append);
+//       print("opened file in append mode");
+//       // Append each name from the list to the file
+//       sink.writeln("\nName of the ATCOs (Sh./Ms.):\n\n");
+//       for (String name in names) {
+//         sink.writeln(name);
+//       }
+//       sink.writeln(
+//           DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal()));
+//       sink.writeln("-----------------------------------------------------");
+//       print("weote to file");
+//     } finally {
+//       // Close the file
+//       sink?.close();
+//       print("closed file");
+//     }
+//     //should be async?
+//   }
