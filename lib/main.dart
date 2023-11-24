@@ -168,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Function to save content to a file
   void saveToFile(String content) async {
     final path = await getFilePath();
-    final file = File('$path/randomized_names.txt');
+    final file = File('$path/Randomised_ATCOs.txt');
 
     // Write to the file
     await file.writeAsString(content);
@@ -183,7 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Function to write content to a file
   Future<void> writeToTextFile(String content) async {
     final path = await getFilePath();
-    final file = File('$path/randomized_names.txt');
+    final file = File('$path/Randomised_ATCOs.txt');
 
     // Write to the file
     await file.writeAsString(content);
@@ -192,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Function to read content from a file
   Future<String> readFromTextFile() async {
     final path = await getFilePath();
-    final file = File('$path/randomized_names.txt');
+    final file = File('$path/Randomised_ATCOs.txt');
 
     // Read from the file
     if (await file.exists()) {
@@ -238,6 +238,8 @@ class _MyHomePageState extends State<MyHomePage> {
   // Function to update the text file with selected names
   void updateTextFile() async {
     // Appends the selected names to the existing content
+    textContent +=
+        '${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}';
     textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
     textContent +=
