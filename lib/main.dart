@@ -165,22 +165,31 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // Function to save content to a file
+// Function to save content to a file
   void saveToFile(String content) async {
-    final path = await getFilePath();
-    final file = File('$path/Randomised_ATCOs.txt');
+    final directory = await getDownloadsDirectory();
+    final file = File('${directory!.path}/Randomised_ATCOs.txt');
 
     // Write to the file
     await file.writeAsString(content);
   }
 
-  // Function to get the file path
+//   // Function to save content to a file
+//   void saveToFile(String content) async {
+//     final path = await getFilePath();
+//     final file = File('$path/Randomised_ATCOs.txt');
+
+//     // Write to the file
+//     await file.writeAsString(content);
+//   }
+
+// Function to get the file path
   Future<String> getFilePath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
+    final directory = await getDownloadsDirectory();
+    return directory!.path; // Note the non-null assertion operator (!)
   }
 
-  // Function to write content to a file
+// Function to write content to a file
   Future<void> writeToTextFile(String content) async {
     final path = await getFilePath();
     final file = File('$path/Randomised_ATCOs.txt');
@@ -189,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await file.writeAsString(content);
   }
 
-  // Function to read content from a file
+// Function to read content from a file
   Future<String> readFromTextFile() async {
     final path = await getFilePath();
     final file = File('$path/Randomised_ATCOs.txt');
