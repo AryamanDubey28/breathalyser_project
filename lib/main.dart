@@ -3,6 +3,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:math';
 import 'package:pdf/widgets.dart' as pw;
@@ -243,13 +244,13 @@ class _MyHomePageState extends State<MyHomePage> {
         '\n\nSelected ATCO - ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}:\n';
     textContent += selectedNames.join(', ') + '\n';
     textContent +=
-        "-------------------------------------------------"; //Divider between each randomization
+        "-------------------------------------------------\n"; //Divider between each randomization
 
     // Get the file path
     final path = await getFilePath();
 
     // Open the file for appending
-    final file = File('$path/randomized_names.txt');
+    final file = File('$path/Randomised_ATCOs.txt');
 
     try {
       // Append the updated content to the file
@@ -280,6 +281,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // Save the content to a file
     saveToFile(textContent);
 
+    // Download the text file
+    await downloadTextFile();
+
     // Create a PDF document as before
     final pdf = pw.Document();
     pdf.addPage(
@@ -304,6 +308,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Open the PDF page with the information
     routeToMyPDF(formattedDate);
+  }
+
+  Future<void> downloadTextFile() async {
+    try {
+      final path = await getFilePath();
+      final file = File('$path/randomized_names.txt');
+
+      if (await file.exists()) {
+        // Trigger download by opening the file in an external app
+        await OpenFile.open(file.path);
+      } else {
+        print('File not found');
+      }
+    } catch (e) {
+      print('Error downloading file: $e');
+    }
   }
 }
 
