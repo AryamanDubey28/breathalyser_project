@@ -1,5 +1,4 @@
 import 'dart:html';
-import 'dart:html' as html;
 import 'dart:io';
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
@@ -130,7 +129,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: const EdgeInsets.only(top: 15.0),
                 child: ElevatedButton(
                   onPressed: () {
-                    addNewContentToText();
                     generateAndOpenPDF();
                   },
                   child: const Text('Show as PDF'),
@@ -230,20 +228,6 @@ class _MyHomePageState extends State<MyHomePage> {
     //should be async?
   }
 
-  void addNewContentToText() {
-    // Appends the selected names to the existing content
-    textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
-    textContent += names.join('\n');
-    textContent +=
-        '\n\nSelected ATCO - ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}:\n';
-    textContent += selectedNames.join(', ') + '\n';
-    textContent +=
-        "-------------------------------------------------"; //Divider between each randomisation
-
-    // Update the existing Blob with the new content + specifices MIME thing which might necessary for some PCs that show in binary?
-    textBlob = Blob([textContent], 'text/plain;charset=utf-8');
-  }
-
   void routeToMyPDF(String formattedDate) {
     //Opens the PDF page on with the information
     Navigator.push(
@@ -276,24 +260,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    // final pdfBytes = pdf.save();  -- Im not sure if Arham added this line or Aryaman - unused so commented for now
-
     //Gets the dates and information for the timetsamps
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now.toLocal());
-
-    // Create a URL for the textBlob content.
-    final textFileUrl = Url.createObjectUrlFromBlob(textBlob);
-
-// Create an anchor element (link) to trigger the download of the text file.
-    AnchorElement(href: textFileUrl)
-      // Sets the 'download' attribute +  a filename for the downloaded file.
-      ..setAttribute('download', 'Selected_ATCO_$formattedDate.txt')
-      ..click();
-
-    // print("Going to append names to history.txt");
-    // await appendNamesToFile();
-    // print("Appended names to history.txt");
 
     routeToMyPDF(formattedDate);
   }
