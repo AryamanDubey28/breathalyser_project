@@ -1,6 +1,9 @@
+import 'dart:io';
+import 'package:file_selector/file_selector.dart';
 import 'package:breathalyser/pdf.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:math';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -161,6 +164,44 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  // Function to save content to a file
+  void saveToFile(String content) async {
+    final path = await getFilePath();
+    final file = File('$path/randomized_names.txt');
+
+    // Write to the file
+    await file.writeAsString(content);
+  }
+
+  // Function to get the file path
+  Future<String> getFilePath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
+  }
+
+  // Function to write content to a file
+  Future<void> writeToTextFile(String content) async {
+    final path = await getFilePath();
+    final file = File('$path/randomized_names.txt');
+
+    // Write to the file
+    await file.writeAsString(content);
+  }
+
+  // Function to read content from a file
+  Future<String> readFromTextFile() async {
+    final path = await getFilePath();
+    final file = File('$path/randomized_names.txt');
+
+    // Read from the file
+    if (await file.exists()) {
+      return await file.readAsString();
+    } else {
+      return 'File not found';
+    }
+  }
+
+  // Function to add names from the text field to the list
   void addNamesFromTextField() {
     String text = nameController.text.trim();
     if (text.isNotEmpty) {
@@ -178,6 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  // Function to randomly select names
   void selectRandomNames() {
     Random random = Random();
     int totalNames = names.length;
@@ -192,10 +234,34 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {});
   }
 
-  void downloadTextFile() {}
+  // Function to update the text file with selected names
+  void updateTextFile() async {
+    // Appends the selected names to the existing content
+    textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
+    textContent += names.join('\n');
+    textContent +=
+        '\n\nSelected ATCO - ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}:\n';
+    textContent += selectedNames.join(', ') + '\n';
+    textContent +=
+        "-------------------------------------------------"; //Divider between each randomization
 
+    // Get the file path
+    final path = await getFilePath();
+
+    // Open the file for appending
+    final file = File('$path/randomized_names.txt');
+
+    try {
+      // Append the updated content to the file
+      await file.writeAsString(textContent, mode: FileMode.append);
+    } catch (e) {
+      print('Error writing to file: $e');
+    }
+  }
+
+  // Function to navigate to the PDF page
   void routeToMyPDF(String formattedDate) {
-    //Opens the PDF page on with the information
+    // Opens the PDF page with the information
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -207,7 +273,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  // Function to generate and open a PDF
   void generateAndOpenPDF() async {
+    // Update the text file with new information
+    updateTextFile();
+    // Save the content to a file
+    saveToFile(textContent);
+
     // Create a PDF document as before
     final pdf = pw.Document();
     pdf.addPage(
@@ -226,19 +298,20 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    //Gets the dates and information for the timetsamps
+    // Gets the dates and information for the timestamps
     DateTime now = DateTime.now();
     String formattedDate = DateFormat('yyyy-MM-dd HH:mm').format(now.toLocal());
 
+    // Open the PDF page with the information
     routeToMyPDF(formattedDate);
   }
 }
 
 // Future appendNamesToFile() async {
-//     //open history.txt and append names to it then close file
+//     // Open history.txt and append names to it then close file
 //     print("in method at start");
 //     dart_io.File file = dart_io.File('/history.txt');
-//     print("made file onject");
+//     print("made file object");
 //     // Open the file for appending
 //     IOSink? sink;
 //     print("made sink");
@@ -254,11 +327,11 @@ class _MyHomePageState extends State<MyHomePage> {
 //       sink.writeln(
 //           DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal()));
 //       sink.writeln("-----------------------------------------------------");
-//       print("weote to file");
+//       print("wrote to file");
 //     } finally {
 //       // Close the file
 //       sink?.close();
 //       print("closed file");
 //     }
-//     //should be async?
-//   }
+//     // Should be async?
+// }
