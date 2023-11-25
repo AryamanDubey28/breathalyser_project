@@ -165,28 +165,19 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-// Function to save content to a file
+  // Function to save content to a file
   void saveToFile(String content) async {
-    final directory = await getDownloadsDirectory();
-    final file = File('${directory!.path}/Randomised_ATCOs.txt');
+    final path = await getFilePath();
+    final file = File('$path/Randomised_ATCOs.txt');
 
     // Write to the file
     await file.writeAsString(content);
   }
 
-//   // Function to save content to a file
-//   void saveToFile(String content) async {
-//     final path = await getFilePath();
-//     final file = File('$path/Randomised_ATCOs.txt');
-
-//     // Write to the file
-//     await file.writeAsString(content);
-//   }
-
 // Function to get the file path
   Future<String> getFilePath() async {
-    final directory = await getDownloadsDirectory();
-    return directory!.path; // Note the non-null assertion operator (!)
+    final directory = await getApplicationDocumentsDirectory();
+    return directory.path;
   }
 
 // Function to write content to a file
@@ -251,8 +242,7 @@ class _MyHomePageState extends State<MyHomePage> {
         '${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}';
     textContent += '\nName of the ATCOs (Sh./Ms.):\n\n';
     textContent += names.join('\n');
-    textContent +=
-        '\n\nSelected ATCO - ${DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now().toLocal())}:\n';
+    textContent += '\n\nSelected ATCO:\n';
     textContent += selectedNames.join(', ') + '\n';
     textContent +=
         "-------------------------------------------------\n"; //Divider between each randomization
@@ -324,13 +314,22 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> downloadTextFile() async {
     try {
       final path = await getFilePath();
-      final file = File('$path/randomized_names.txt');
+      final file = File('$path/Randomised_ATCOs.txt');
 
       if (await file.exists()) {
         // Trigger download by opening the file in an external app
         await OpenFile.open(file.path);
       } else {
-        print('File not found');
+        // If the file doesn't exist, create it with an empty content
+        await file.create();
+        print('File created');
+
+        // Optionally, you can add code here to write some default content to the file
+        // For example:
+        // await file.writeAsString('Default content');
+
+        // Retry downloading after creating the file
+        await OpenFile.open(file.path);
       }
     } catch (e) {
       print('Error downloading file: $e');
